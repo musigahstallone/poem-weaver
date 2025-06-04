@@ -2,24 +2,23 @@
 'use client';
 
 import type { User } from 'firebase/auth';
-import { GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, createUserWithEmailAndPassword, signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword } from 'firebase/auth';
 import { useRouter, usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase'; // Assuming firebase.ts exports auth
+import { auth } from '@/lib/firebase';
 import { Loader2 } from 'lucide-react';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   signInWithGoogle: () => Promise<void>;
+  registerWithEmail: (email: string, pass: string) => Promise<User | null | string>;
+  signInWithEmail: (email: string, pass: string) => Promise<User | null | string>;
   signOut: () => Promise<void>;
-  isAllowedUser: (email: string | null) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const ALLOWED_EMAIL_PATTERNS = ['stallone', 'musigah', 'winsy', 'jill'];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -27,24 +26,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const isAllowedUser = (email: string | null): boolean => {
-    if (!email) return false;
-    return ALLOWED_EMAIL_PATTERNS.some(pattern => email.toLowerCase().includes(pattern));
-  };
-
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (firebaseUser) => {
       if (firebaseUser) {
-        if (isAllowedUser(firebaseUser.email)) {
-          setUser(firebaseUser);
-        } else {
-          // User is authenticated but not allowed
-          await firebaseSignOut(auth); // Sign them out
-          setUser(null);
-          if (pathname !== '/login') {
-            router.push('/login?error=unauthorized');
-          }
-        }
+        setUser(firebaseUser);
       } else {
         setUser(null);
       }
@@ -52,7 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, [router, pathname]);
+  }, []);
 
   const signInWithGoogle = async () => {
     setLoading(true);
@@ -60,20 +45,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const result = await signInWithPopup(auth, provider);
       if (result.user) {
-        if (isAllowedUser(result.user.email)) {
-          setUser(result.user);
-          router.push('/');
-        } else {
-          await firebaseSignOut(auth);
-          setUser(null);
-          router.push('/login?error=unauthorized');
-          // Consider showing a toast message here as well
-        }
+        setUser(result.user);
+        router.push('/');
       }
     } catch (error) {
       console.error("Error signing in with Google:", error);
       setUser(null);
       router.push('/login?error=signInFailed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const registerWithEmail = async (email: string, pass: string): Promise<User | null | string> => {
+    setLoading(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      setUser(userCredential.user);
+      router.push('/');
+      return userCredential.user;
+    } catch (error: any) {
+      console.error("Error registering with email:", error);
+      return error.code || "registrationFailed";
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const signInWithEmail = async (email: string, pass: string): Promise<User | null | string> => {
+    setLoading(true);
+    try {
+      const userCredential = await firebaseSignInWithEmailAndPassword(auth, email, pass);
+      setUser(userCredential.user);
+      router.push('/');
+      return userCredential.user;
+    } catch (error: any) {
+      console.error("Error signing in with email:", error);
+      return error.code || "signInFailed";
     } finally {
       setLoading(false);
     }
@@ -87,23 +95,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       router.push('/login');
     } catch (error) {
       console.error("Error signing out:", error);
-      // Handle sign out error, maybe show a toast
     } finally {
       setLoading(false);
     }
   };
 
-  if (loading && !user && pathname !== '/login') {
+  if (loading && pathname !== '/login') {
      return (
-      <div className="flex min-h-svh items-center justify-center">
+      <div className="flex min-h-svh items-center justify-center bg-background">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
 
-
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut, isAllowedUser }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, registerWithEmail, signInWithEmail, signOut }}>
       {children}
     </AuthContext.Provider>
   );
