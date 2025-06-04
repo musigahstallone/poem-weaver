@@ -4,8 +4,8 @@ import { Toaster } from "@/components/ui/toaster";
 import Image from 'next/image';
 
 export const metadata: Metadata = {
-  title: 'Poem Weaver',
-  description: 'Generate beautiful poems with AI',
+  title: 'Poem Weaver for Winsy',
+  description: 'Craft beautiful poems, dedicated to Winsy from Stallone.',
 };
 
 export default function RootLayout({
@@ -24,13 +24,13 @@ export default function RootLayout({
         <div className="fixed inset-0 -z-10">
           <Image
             src="https://placehold.co/1920x1080.png?text=+" 
-            alt="Floral background"
+            alt="Elegant floral background"
             layout="fill"
             objectFit="cover"
             quality={80}
-            data-ai-hint="delicate floral pattern"
+            data-ai-hint="elegant floral"
           />
-           <div className="absolute inset-0 bg-background/50 backdrop-blur-xs"></div> {/* Optional: Soft overlay for better text readability */}
+           <div className="absolute inset-0 bg-background/60 backdrop-blur-sm"></div> {/* Soft overlay for better text readability */}
         </div>
         <div className="relative z-0">
           {children}
