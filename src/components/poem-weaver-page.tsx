@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -50,7 +51,6 @@ export default function PoemWeaverPage() {
   });
 
   useEffect(() => {
-    // Show dedication modal on initial load
     const hasSeenDedication = localStorage.getItem('seenDedicationStalloneToWinsy');
     if (!hasSeenDedication) {
       setShowDedicationModal(true);
@@ -105,7 +105,8 @@ export default function PoemWeaverPage() {
               <Heart className="h-6 w-6 text-primary" /> A Special Dedication
             </AlertDialogTitle>
             <AlertDialogDescription className="pt-2 text-left">
-              This app is lovingly dedicated to <strong>Winsy</strong>, from your friend <strong>Stallone</strong>.
+              This app is lovingly dedicated to <strong>Winsy</strong> from your friend.
+              {/* <strong>Stallone</strong>. */}
               <br />
               May your days be filled with beautiful verses and endless inspiration!
             </AlertDialogDescription>
@@ -116,17 +117,18 @@ export default function PoemWeaverPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="flex flex-col min-h-screen items-center justify-center p-4 md:p-8 bg-transparent">
+      <div className="flex flex-col min-h-svh items-center justify-center p-4 sm:p-6 md:p-8 bg-transparent">
         <header className="mb-8 text-center">
           <div className="flex items-center justify-center gap-3 text-4xl md:text-5xl font-headline font-bold text-foreground">
             <Sparkles className="h-10 w-10 text-accent" />
             <h1 className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">Poem Weaver</h1>
           </div>
-          <p className="text-muted-foreground mt-2 text-lg">Discover the magic of words, a special space for Winsy.</p>
+          <p className="text-muted-foreground mt-2 text-lg">Discover the magic of words</p>
+          <p className="text-muted-foreground mt-2 text-lg">A special space for Winsy.</p>
         </header>
 
         <Card className="w-full max-w-4xl shadow-2xl rounded-xl bg-card/90 backdrop-blur-md border-border/50">
-          <CardContent className="p-6 md:p-10">
+          <CardContent className="p-6 sm:p-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
               <div className="space-y-6">
                 <h2 className="text-2xl font-headline font-semibold text-foreground">Create Your Poem</h2>
@@ -188,7 +190,7 @@ export default function PoemWeaverPage() {
               </div>
 
               <Separator orientation="vertical" className="hidden md:block mx-auto h-auto bg-border/70" />
-              <Separator orientation="horizontal" className="block md:hidden my-4 bg-border/70" />
+              <Separator orientation="horizontal" className="block md:hidden my-6 bg-border/70" />
 
               <div className="space-y-4">
                 <h2 className="text-2xl font-headline font-semibold text-foreground">Your Poetic Creation</h2>
@@ -219,9 +221,10 @@ export default function PoemWeaverPage() {
         </Card>
         <footer className="mt-12 text-center text-muted-foreground text-sm">
           <p>&copy; {new Date().getFullYear()} Poem Weaver. Specially for Winsy.</p>
-          <p>Powered by Generative AI. With love from Stallone.</p>
+          {/* <p>Powered by Generative AI. With love from Stallone.</p> */}
         </footer>
       </div>
     </>
   );
 }
+
