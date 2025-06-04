@@ -70,8 +70,8 @@ export default function PoemWeaverPage() {
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    if (user) { // Only show dedication if user is logged in
-      const hasSeenDedication = localStorage.getItem(`seenDedicationStalloneToWinsy_${user.uid}`);
+    if (user) { 
+      const hasSeenDedication = localStorage.getItem(`seenDedicationStalloneToUser_${user.uid}`);
       if (!hasSeenDedication) {
         setShowDedicationModal(true);
       }
@@ -81,7 +81,7 @@ export default function PoemWeaverPage() {
   const handleCloseDedicationModal = () => {
     setShowDedicationModal(false);
     if (user) {
-      localStorage.setItem(`seenDedicationStalloneToWinsy_${user.uid}`, 'true');
+      localStorage.setItem(`seenDedicationStalloneToUser_${user.uid}`, 'true');
     }
   };
 
@@ -128,6 +128,23 @@ export default function PoemWeaverPage() {
     setAnimatePoem(false);
   }
 
+  let dedicationUserName = "Friend"; 
+  if (user) {
+    if (user.displayName) {
+      const nameParts = user.displayName.split(' ');
+      dedicationUserName = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1);
+    } else if (user.email) {
+      const emailPrefix = user.email.split('@')[0];
+      dedicationUserName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
+      if (dedicationUserName.length > 15) { // Avoid very long email prefixes
+        dedicationUserName = "User";
+      }
+    }
+  }
+  
+  const initialDedicationMessage = `This app is lovingly dedicated to ${dedicationUserName} from your friend, Stallone. May your days be filled with beautiful verses and endless inspiration!`;
+
+
   if (authLoading || !user) {
     return (
       <div className="flex min-h-svh items-center justify-center">
@@ -139,19 +156,17 @@ export default function PoemWeaverPage() {
   return (
     <>
       <AlertDialog open={showDedicationModal} onOpenChange={setShowDedicationModal}>
-        <AlertDialogContent>
+        <AlertDialogContent className="bg-card/95 backdrop-blur-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              <Heart className="h-6 w-6 text-primary" /> A Special Dedication
+            <AlertDialogTitle className="flex items-center gap-2 text-2xl font-headline">
+              <Heart className="h-7 w-7 text-primary" /> A Special Dedication
             </AlertDialogTitle>
-            <AlertDialogDescription className="pt-2 text-left">
-              This app is lovingly dedicated to <strong>Winsy</strong> from your friend, <strong>Stallone</strong>.
-              <br />
-              May your days be filled with beautiful verses and endless inspiration!
+            <AlertDialogDescription className="pt-3 text-base text-foreground/80 text-left">
+              {initialDedicationMessage}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={handleCloseDedicationModal}>Continue to App</AlertDialogAction>
+            <AlertDialogAction onClick={handleCloseDedicationModal} className="text-base px-5 py-2.5">Continue to App</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -160,8 +175,7 @@ export default function PoemWeaverPage() {
         <Navbar />
         <main className="flex-grow flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 w-full">
           <header className="mb-8 text-center">
-            {/* Title moved to Navbar, this header can be for page specific sub-titles or removed */}
-            <p className="text-muted-foreground mt-2 text-lg">Discover the magic of words, Winsy</p>
+            <p className="text-muted-foreground mt-2 text-lg">Discover the magic of words, {dedicationUserName}!</p>
           </header>
 
           <Card className="w-full max-w-4xl shadow-2xl rounded-xl bg-card/90 backdrop-blur-md border-border/50">
@@ -263,7 +277,7 @@ export default function PoemWeaverPage() {
                         ) : (
                           <div className="text-center text-muted-foreground">
                             <BookMarked className="h-12 w-12 text-primary/70 mx-auto mb-3" />
-                             <p>Winsy, your beautifully crafted poem will appear here. Let inspiration find you!</p>
+                             <p>{dedicationUserName}, your beautifully crafted poem will appear here. Let inspiration find you!</p>
                           </div>
                         )}
                       </Card>
@@ -277,8 +291,16 @@ export default function PoemWeaverPage() {
               </CardContent>
             </Tabs>
           </Card>
-          <footer className="mt-12 text-center text-muted-foreground text-sm">
-            <p>&copy; {new Date().getFullYear()} Poem Weaver. Specially for Winsy, from Stallone.</p>
+          <footer className="mt-12 text-center text-muted-foreground text-sm space-y-2">
+            <p>&copy; {new Date().getFullYear()} Poem Weaver. Specially for {dedicationUserName}, from Stallone.</p>
+            <p className="text-xs">
+              Developed by Stallone Musigah
+              <br />
+              <a href="https://musigahstallone.tech" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary transition-colors">
+                musigahstallone.tech
+              </a>
+              {' | '}0797204141
+            </p>
           </footer>
         </main>
       </div>

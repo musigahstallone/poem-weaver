@@ -6,12 +6,18 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getPoemsForUser, type PoemHistoryItem } from '@/services/poemHistoryService';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, BookHeart, History } from 'lucide-react';
+import { Loader2, BookHeart } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useState } from 'react';
+import PoemDisplayDialog from './PoemDisplayDialog';
 
-function PoemHistoryCard({ item }: { item: PoemHistoryItem }) {
+function PoemHistoryCard({ item, onClick }: { item: PoemHistoryItem; onClick: (item: PoemHistoryItem) => void }) {
   return (
-    <Card className="mb-4 bg-card/70 backdrop-blur-sm border-border/30 shadow-md hover:shadow-lg transition-shadow duration-300">
+    <Card 
+      className="mb-4 bg-card/70 backdrop-blur-sm border-border/30 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+      onClick={() => onClick(item)}
+      aria-label={`View poem: ${item.theme}`}
+    >
       <CardHeader className="pb-3">
         <CardTitle className="text-xl font-headline text-primary">{item.theme}</CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
@@ -19,7 +25,7 @@ function PoemHistoryCard({ item }: { item: PoemHistoryItem }) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-32">
+        <ScrollArea className="h-24">
           <p className="whitespace-pre-wrap text-sm text-foreground">{item.poem}</p>
         </ScrollArea>
       </CardContent>
@@ -29,12 +35,27 @@ function PoemHistoryCard({ item }: { item: PoemHistoryItem }) {
 
 export default function PoemHistoryTab() {
   const { user } = useAuth();
+  const [selectedPoem, setSelectedPoem] = useState<PoemHistoryItem | null>(null);
+  const [isPoemDialogVisible, setIsPoemDialogVisible] = useState(false);
 
   const { data: poems, isLoading, error } = useQuery<PoemHistoryItem[], Error>({
     queryKey: ['poemHistory', user?.uid],
-    queryFn: () => getPoemsForUser(user!.uid),
-    enabled: !!user,
+    queryFn: () => {
+      if (!user?.uid) throw new Error("User not authenticated");
+      return getPoemsForUser(user.uid);
+    },
+    enabled: !!user?.uid,
   });
+
+  const handlePoemCardClick = (poem: PoemHistoryItem) => {
+    setSelectedPoem(poem);
+    setIsPoemDialogVisible(true);
+  };
+
+  const handleClosePoemDialog = () => {
+    setIsPoemDialogVisible(false);
+    // setSelectedPoem(null); // Optional: clear selected poem immediately
+  };
 
   if (isLoading) {
     return (
@@ -54,18 +75,25 @@ export default function PoemHistoryTab() {
       <div className="flex flex-col items-center justify-center min-h-[300px] text-muted-foreground p-6 text-center">
         <BookHeart className="h-16 w-16 text-primary/70 mb-4" />
         <h3 className="text-xl font-semibold mb-2 text-foreground">No Poems Yet</h3>
-        <p>Start creating beautiful poems, and they will appear here for you to cherish, Winsy!</p>
+        <p>Start creating beautiful poems, and they will appear here!</p>
       </div>
     );
   }
 
   return (
-    <ScrollArea className="h-[calc(100vh-380px)] md:h-[calc(100vh-350px)] lg:h-[450px] pr-3">
-      <div className="space-y-4">
-        {poems.map((item) => (
-          <PoemHistoryCard key={item.id} item={item} />
-        ))}
-      </div>
-    </ScrollArea>
+    <>
+      <ScrollArea className="h-[calc(100vh-380px)] md:h-[calc(100vh-350px)] lg:h-[450px] pr-3">
+        <div className="space-y-4">
+          {poems.map((item) => (
+            <PoemHistoryCard key={item.id} item={item} onClick={handlePoemCardClick} />
+          ))}
+        </div>
+      </ScrollArea>
+      <PoemDisplayDialog
+        poem={selectedPoem}
+        isOpen={isPoemDialogVisible}
+        onClose={handleClosePoemDialog}
+      />
+    </>
   );
 }
