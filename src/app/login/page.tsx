@@ -85,6 +85,9 @@ export default function LoginPage() {
       case 'auth/wrong-password':
         setAuthError('Incorrect password. Please try again.');
         break;
+      case 'auth/invalid-credential':
+        setAuthError('Invalid email or password. Please check your credentials and try again.');
+        break;
       case 'auth/email-already-in-use':
         setAuthError('This email is already registered. Please sign in.');
         break;
