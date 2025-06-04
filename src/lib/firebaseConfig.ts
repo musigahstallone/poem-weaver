@@ -4,8 +4,12 @@
 // Ensure you have environment variables set up for these values.
 
 if (!process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-  console.warn(
-    "Firebase API Key is missing. Ensure NEXT_PUBLIC_FIREBASE_API_KEY is set in your .env.local file and that the Next.js development server was restarted after creating/modifying the .env.local file."
+  console.error(
+    "CRITICAL: Firebase API Key (NEXT_PUBLIC_FIREBASE_API_KEY) is missing or not loaded into the environment. \n" +
+    "1. Ensure NEXT_PUBLIC_FIREBASE_API_KEY is correctly set with a valid value in your .env.local file (in the project root). Double-check for typos. \n" +
+    "2. If you recently created or modified the .env.local file, YOU MUST RESTART your Next.js development server for changes to take effect. \n" +
+    "This is a very common cause of 'Firebase: Error (auth/invalid-api-key)'. \n" +
+    "3. Verify the API key in your Firebase Console under Project settings > General > Your apps > SDK setup and configuration."
   );
 }
 
