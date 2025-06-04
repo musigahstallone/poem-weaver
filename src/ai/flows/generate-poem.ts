@@ -39,18 +39,17 @@ Style: {{{style}}}
 Weave your words with elegance and emotion. The poem should be uplifting, inspiring, or deeply touching, suitable for Winsy.
 Ensure the poem is well-structured according to the specified style if it's a formal one (like sonnet or haiku). For free verse, let creativity flow.
 `,
-  // Example of model configuration, if needed:
-  // config: {
-  //   model: 'gemini-1.5-flash-latest', // Or your preferred model
-  //   temperature: 0.7,
-  //   maxOutputTokens: 512,
-  //   safetySettings: [ // Optional: adjust safety settings
-  //     {
-  //       category: 'HARM_CATEGORY_HATE_SPEECH',
-  //       threshold: 'BLOCK_MEDIUM_AND_ABOVE',
-  //     },
-  //   ],
-  // },
+  config: {
+    model: 'gemini-1.5-flash-latest', 
+    temperature: 0.7,
+    maxOutputTokens: 512,
+    // safetySettings: [ 
+    //   {
+    //     category: 'HARM_CATEGORY_HATE_SPEECH',
+    //     threshold: 'BLOCK_MEDIUM_AND_ABOVE',
+    //   },
+    // ],
+  },
 });
 
 const generatePoemFlow = ai.defineFlow(
