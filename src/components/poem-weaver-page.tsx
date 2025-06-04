@@ -1,19 +1,19 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea'; // Import Textarea
-import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
-import { Wand2, RotateCcw, Loader2, Heart, BookMarked, History, Save } from 'lucide-react';
+import { Wand2, RotateCcw, Loader2, Heart, History, Save, AlertTriangleIcon } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,19 +29,32 @@ import Navbar from '@/components/Navbar';
 import { savePoemToHistory } from '@/services/poemHistoryService';
 import PoemHistoryTab from '@/components/PoemHistoryTab';
 import { useQueryClient } from '@tanstack/react-query';
+import { generatePoem } from '@/ai/flows/generate-poem';
 
 const formSchema = z.object({
-  title: z.string().min(2, { message: "Title must be at least 2 characters." }).max(100, { message: "Title must be at most 100 characters." }),
-  poem: z.string().min(10, { message: "Poem must be at least 10 characters." }).max(5000, {message: "Poem is too long."}),
+  theme: z.string().min(2, { message: "Theme must be at least 2 characters." }).max(100, { message: "Theme must be at most 100 characters." }),
+  style: z.string().min(1, { message: "Please select a style." }),
 });
 
 type PoemFormValues = z.infer<typeof formSchema>;
+
+const poetryStyles = [
+  "Free Verse", "Romantic", "Haiku", "Sonnet", "Limerick", "Ode", 
+  "Ballad", "Elegy", "Acrostic", "Villanelle", "Narrative", "Descriptive",
+  "Reflective", "Humorous", "Melancholic", "Inspirational"
+];
 
 export default function PoemWeaverPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
 
+  const [isLoadingPoem, setIsLoadingPoem] = useState(false);
+  const [generatedPoem, setGeneratedPoem] = useState<string | null>(null);
+  const [currentTheme, setCurrentTheme] = useState<string | null>(null);
+  const [currentStyle, setCurrentStyle] = useState<string | null>(null);
+  const [aiError, setAiError] = useState<string | null>(null);
+  
   const [isSavingPoem, setIsSavingPoem] = useState(false);
   const [showDedicationModal, setShowDedicationModal] = useState(false);
   const { toast } = useToast();
@@ -50,8 +63,8 @@ export default function PoemWeaverPage() {
   const form = useForm<PoemFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      poem: '',
+      theme: '',
+      style: '',
     },
   });
 
@@ -77,20 +90,50 @@ export default function PoemWeaverPage() {
     }
   };
 
-  async function onSubmit(data: PoemFormValues) {
+  async function onGenerateSubmit(data: PoemFormValues) {
     if (!user) {
-        toast({ title: "Not Authenticated", description: "Please log in to save your poem.", variant: "destructive" });
+        toast({ title: "Not Authenticated", description: "Please log in to generate a poem.", variant: "destructive" });
+        return;
+    }
+    setIsLoadingPoem(true);
+    setGeneratedPoem(null);
+    setAiError(null);
+    setCurrentTheme(data.theme);
+    setCurrentStyle(data.style);
+
+    try {
+      const result = await generatePoem({ theme: data.theme, style: data.style });
+      setGeneratedPoem(result.poem);
+    } catch (err) {
+      console.error("Error generating poem:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to generate poem. Please try again.";
+      setAiError(errorMessage);
+      toast({
+        title: "Error Generating Poem",
+        description: errorMessage,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingPoem(false);
+    }
+  }
+
+  async function handleSavePoem() {
+    if (!user || !generatedPoem || !currentTheme || !currentStyle) {
+        toast({ title: "Cannot Save Poem", description: "No poem generated or missing details.", variant: "destructive" });
         return;
     }
     setIsSavingPoem(true);
     try {
-      await savePoemToHistory(user.uid, data.title, data.poem);
+      await savePoemToHistory(user.uid, currentTheme, currentStyle, generatedPoem);
       toast({
         title: "Poem Saved!",
         description: "Your masterpiece is saved to your history.",
       });
       queryClient.invalidateQueries({ queryKey: ['poemHistory', user.uid] });
-      form.reset(); // Reset form after successful save
+      // Optionally reset parts of the form or generated content here
+      // setGeneratedPoem(null); 
+      // form.reset(); // or just reset generated poem related state
     } catch (err) {
       console.error("Error saving poem:", err);
       const errorMessage = err instanceof Error ? err.message : "Failed to save poem. Please try again.";
@@ -105,7 +148,13 @@ export default function PoemWeaverPage() {
   }
 
   function handleReset() {
-    form.reset({ title: '', poem: '' });
+    form.reset({ theme: '', style: '' });
+    setGeneratedPoem(null);
+    setCurrentTheme(null);
+    setCurrentStyle(null);
+    setAiError(null);
+    setIsLoadingPoem(false);
+    setIsSavingPoem(false);
   }
 
   let dedicationUserName = "Friend"; 
@@ -123,7 +172,6 @@ export default function PoemWeaverPage() {
   }
   
   const initialDedicationMessage = `This app is lovingly dedicated to ${dedicationUserName} from your friend, Stallone. May your days be filled with beautiful verses and endless inspiration!`;
-
 
   if (authLoading || !user) {
     return (
@@ -163,7 +211,7 @@ export default function PoemWeaverPage() {
               <CardHeader className="p-4 sm:p-6 border-b border-border/30">
                 <TabsList className="grid w-full grid-cols-2 md:w-auto md:mx-auto">
                     <TabsTrigger value="create" className="text-sm sm:text-base">
-                        <Wand2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />Write Poem
+                        <Wand2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />Generate Poem
                     </TabsTrigger>
                     <TabsTrigger value="history" className="text-sm sm:text-base">
                         <History className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />Poem History
@@ -173,17 +221,17 @@ export default function PoemWeaverPage() {
               <CardContent className="p-6 sm:p-8">
                 <TabsContent value="create">
                   <div className="space-y-6">
-                      <h2 className="text-2xl font-headline font-semibold text-foreground">Compose Your Verse</h2>
+                      <h2 className="text-2xl font-headline font-semibold text-foreground">Craft Your Verse with AI</h2>
                       <Form {...form}>
-                        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                        <form onSubmit={form.handleSubmit(onGenerateSubmit)} className="space-y-6">
                           <FormField
                             control={form.control}
-                            name="title"
+                            name="theme"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-base">Title</FormLabel>
+                                <FormLabel className="text-base">Theme</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="e.g., My Ode to Spring, A Silent Night" {...field} className="text-base py-3 px-4 rounded-md" />
+                                  <Input placeholder="e.g., Spring Morning, Lost Love, Starry Night" {...field} className="text-base py-3 px-4 rounded-md" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -191,33 +239,77 @@ export default function PoemWeaverPage() {
                           />
                           <FormField
                             control={form.control}
-                            name="poem"
+                            name="style"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-base">Your Poem</FormLabel>
-                                <FormControl>
-                                  <Textarea placeholder="Write your beautiful poem here..." {...field} className="text-base py-3 px-4 rounded-md min-h-[200px] md:min-h-[250px]" />
-                                </FormControl>
+                                <FormLabel className="text-base">Style</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                  <FormControl>
+                                    <SelectTrigger className="text-base py-3 px-4 rounded-md">
+                                      <SelectValue placeholder="Select a poetry style" />
+                                    </SelectTrigger>
+                                  </FormControl>
+                                  <SelectContent>
+                                    {poetryStyles.map(style => (
+                                      <SelectItem key={style} value={style} className="text-base">
+                                        {style}
+                                      </SelectItem>
+                                    ))}
+                                  </SelectContent>
+                                </Select>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
-                          <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                            <Button type="submit" disabled={isSavingPoem} className="w-full sm:w-auto text-base px-6 py-3 rounded-md">
-                              {isSavingPoem ? (
+                          <div className="flex flex-col sm:flex-row gap-4 pt-2">
+                            <Button type="submit" disabled={isLoadingPoem || isSavingPoem} className="w-full sm:w-auto text-base px-6 py-3 rounded-md">
+                              {isLoadingPoem ? (
                                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                               ) : (
-                                <Save className="mr-2 h-5 w-5" />
+                                <Wand2 className="mr-2 h-5 w-5" />
                               )}
-                              Save Poem
+                              Generate Poem
                             </Button>
-                            <Button type="button" variant="secondary" onClick={handleReset} disabled={isSavingPoem} className="w-full sm:w-auto text-base px-6 py-3 rounded-md">
+                            <Button type="button" variant="secondary" onClick={handleReset} disabled={isLoadingPoem || isSavingPoem} className="w-full sm:w-auto text-base px-6 py-3 rounded-md">
                               <RotateCcw className="mr-2 h-5 w-5" />
                               Reset
                             </Button>
                           </div>
                         </form>
                       </Form>
+
+                      {aiError && (
+                        <Alert variant="destructive" className="mt-6">
+                          <AlertTriangleIcon className="h-5 w-5" />
+                          <AlertTitle>Generation Failed</AlertTitle>
+                          <AlertDescription>{aiError}</AlertDescription>
+                        </Alert>
+                      )}
+
+                      {generatedPoem && (
+                        <Card className="mt-6 bg-muted/30 border-primary/30 shadow-inner">
+                          <CardHeader>
+                            <CardTitle className="text-xl font-headline text-primary">Your Generated Poem</CardTitle>
+                            <CardDescription>Theme: {currentTheme} | Style: {currentStyle}</CardDescription>
+                          </CardHeader>
+                          <CardContent>
+                            <Textarea
+                              value={generatedPoem}
+                              readOnly
+                              className="text-base py-3 px-4 rounded-md min-h-[200px] md:min-h-[250px] bg-background/70 focus-visible:ring-primary/50"
+                              aria-label="Generated poem"
+                            />
+                            <Button onClick={handleSavePoem} disabled={isSavingPoem} className="mt-4 text-base px-6 py-3 rounded-md">
+                              {isSavingPoem ? (
+                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                              ) : (
+                                <Save className="mr-2 h-5 w-5" />
+                              )}
+                              Save This Poem
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      )}
                     </div>
                 </TabsContent>
                 <TabsContent value="history">

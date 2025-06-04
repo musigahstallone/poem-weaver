@@ -1,4 +1,3 @@
-
 'use server';
 
 import { db } from '@/lib/firebase';
@@ -7,14 +6,16 @@ import { collection, addDoc, query, orderBy, getDocs, serverTimestamp, type Time
 export interface PoemHistoryItem {
   id: string;
   userId: string;
-  title: string; 
+  theme: string; 
+  style: string;
   poem: string; 
   createdAt: Timestamp;
 }
 
 export async function savePoemToHistory(
   userId: string,
-  title: string,
+  theme: string,
+  style: string,
   poemContent: string
 ): Promise<string | null> {
   if (!userId) {
@@ -24,7 +25,8 @@ export async function savePoemToHistory(
   try {
     const poemData = {
       userId,
-      title,
+      theme,
+      style,
       poem: poemContent,
       createdAt: serverTimestamp(),
     };
@@ -33,7 +35,6 @@ export async function savePoemToHistory(
     return docRef.id;
   } catch (error) {
     console.error("Error saving poem to history:", error);
-    // Optionally, rethrow or return a more specific error object
     if (error instanceof Error) {
         throw new Error(`Failed to save poem: ${error.message}`);
     }

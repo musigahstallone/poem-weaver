@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { PoemHistoryItem } from '@/services/poemHistoryService';
@@ -6,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
-import { X } from 'lucide-react';
+import { X, Info, Palette } from 'lucide-react';
 
 interface PoemDisplayDialogProps {
   poem: PoemHistoryItem | null;
@@ -21,9 +20,13 @@ export default function PoemDisplayDialog({ poem, isOpen, onClose }: PoemDisplay
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] bg-card/95 backdrop-blur-md border-border/50 shadow-xl rounded-lg">
         <DialogHeader className="pr-10">
-          <DialogTitle className="text-2xl font-headline text-primary">{poem.title}</DialogTitle>
-          <DialogDescription className="text-sm text-muted-foreground pt-1">
-            Crafted {poem.createdAt ? formatDistanceToNow(poem.createdAt.toDate(), { addSuffix: true }) : 'some time ago'}
+          <DialogTitle className="text-2xl font-headline text-primary">{poem.theme}</DialogTitle>
+          <DialogDescription className="text-sm text-muted-foreground pt-1 space-y-1">
+            <div className="flex items-center">
+              <Palette className="mr-2 h-4 w-4 text-accent" />
+              <span>Style: {poem.style}</span>
+            </div>
+            <div>Crafted {poem.createdAt ? formatDistanceToNow(poem.createdAt.toDate(), { addSuffix: true }) : 'some time ago'}</div>
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[50vh] max-h-[400px] my-4 pr-4 rounded-md border border-border/30 bg-muted/20 p-4">
