@@ -10,13 +10,13 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
 
-export const PoemGenerationInputSchema = z.object({
+const PoemGenerationInputSchema = z.object({
   theme: z.string().min(1).describe('The theme or topic for the poem.'),
   style: z.string().min(1).describe('The desired style of the poem (e.g., haiku, sonnet, free verse, romantic, melancholic).'),
 });
 export type PoemGenerationInput = z.infer<typeof PoemGenerationInputSchema>;
 
-export const PoemGenerationOutputSchema = z.object({
+const PoemGenerationOutputSchema = z.object({
   poem: z.string().describe('The generated poem.'),
 });
 export type PoemGenerationOutput = z.infer<typeof PoemGenerationOutputSchema>;

@@ -9,14 +9,13 @@
 
 import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
-import {nextPlugin} from '@genkit-ai/next';
 
-// Initialize Genkit with the GoogleAI plugin and Next.js plugin.
+// Initialize Genkit with the GoogleAI plugin.
 // Ensure GOOGLE_API_KEY environment variable is set.
 export const ai = genkit({
   plugins: [
     googleAI(),
-    nextPlugin(), // For Next.js integration, especially API route handlers if needed
+    // nextPlugin() has been removed as it's causing an import error
   ],
   // Set to true to disable Genkit telemetry.
   // Demos and samples should have this set to true.
