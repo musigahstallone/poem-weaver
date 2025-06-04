@@ -5,17 +5,15 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { generatePoem, type GeneratePoemInput, type GeneratePoemOutput } from '@/ai/flows/generate-poem';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea'; // Import Textarea
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
-import { Sparkles, Wand2, RotateCcw, Loader2, Heart, BookMarked, History } from 'lucide-react';
+import { Wand2, RotateCcw, Loader2, Heart, BookMarked, History, Save } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,12 +30,9 @@ import { savePoemToHistory } from '@/services/poemHistoryService';
 import PoemHistoryTab from '@/components/PoemHistoryTab';
 import { useQueryClient } from '@tanstack/react-query';
 
-
-const poemStyles = ["Ode", "Sonnet", "Haiku", "Free Verse", "Limerick"] as const;
-
 const formSchema = z.object({
-  theme: z.string().min(2, { message: "Theme must be at least 2 characters." }).max(100, { message: "Theme must be at most 100 characters." }),
-  style: z.enum(poemStyles, { required_error: "Please select a poem style." }),
+  title: z.string().min(2, { message: "Title must be at least 2 characters." }).max(100, { message: "Title must be at most 100 characters." }),
+  poem: z.string().min(10, { message: "Poem must be at least 10 characters." }).max(5000, {message: "Poem is too long."}),
 });
 
 type PoemFormValues = z.infer<typeof formSchema>;
@@ -47,10 +42,7 @@ export default function PoemWeaverPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  const [generatedPoem, setGeneratedPoem] = useState<string | null>(null);
-  const [isLoadingPoem, setIsLoadingPoem] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [animatePoem, setAnimatePoem] = useState(false);
+  const [isSavingPoem, setIsSavingPoem] = useState(false);
   const [showDedicationModal, setShowDedicationModal] = useState(false);
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("create");
@@ -58,8 +50,8 @@ export default function PoemWeaverPage() {
   const form = useForm<PoemFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      theme: '',
-      style: undefined,
+      title: '',
+      poem: '',
     },
   });
 
@@ -86,46 +78,34 @@ export default function PoemWeaverPage() {
   };
 
   async function onSubmit(data: PoemFormValues) {
-    setIsLoadingPoem(true);
-    setError(null);
-    setGeneratedPoem(null);
-    setAnimatePoem(false);
-
+    if (!user) {
+        toast({ title: "Not Authenticated", description: "Please log in to save your poem.", variant: "destructive" });
+        return;
+    }
+    setIsSavingPoem(true);
     try {
-      const result: GeneratePoemOutput = await generatePoem({
-        theme: data.theme,
-        style: data.style,
-      });
-      setGeneratedPoem(result.poem);
-      setTimeout(() => setAnimatePoem(true), 50);
-
-      if (user && result.poem) {
-        await savePoemToHistory(user.uid, data, result);
-        toast({
-          title: "Poem Saved!",
-          description: "Your masterpiece is saved to your history.",
-        });
-        queryClient.invalidateQueries({ queryKey: ['poemHistory', user.uid] });
-      }
-    } catch (err) {
-      console.error("Error generating poem:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to generate poem. Please try again.";
-      setError(errorMessage);
+      await savePoemToHistory(user.uid, data.title, data.poem);
       toast({
-        title: "Error",
+        title: "Poem Saved!",
+        description: "Your masterpiece is saved to your history.",
+      });
+      queryClient.invalidateQueries({ queryKey: ['poemHistory', user.uid] });
+      form.reset(); // Reset form after successful save
+    } catch (err) {
+      console.error("Error saving poem:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to save poem. Please try again.";
+      toast({
+        title: "Error Saving Poem",
         description: errorMessage,
         variant: "destructive",
       });
     } finally {
-      setIsLoadingPoem(false);
+      setIsSavingPoem(false);
     }
   }
 
   function handleReset() {
-    form.reset({ theme: '', style: undefined });
-    setGeneratedPoem(null);
-    setError(null);
-    setAnimatePoem(false);
+    form.reset({ title: '', poem: '' });
   }
 
   let dedicationUserName = "Friend"; 
@@ -136,7 +116,7 @@ export default function PoemWeaverPage() {
     } else if (user.email) {
       const emailPrefix = user.email.split('@')[0];
       dedicationUserName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
-      if (dedicationUserName.length > 15) { // Avoid very long email prefixes
+      if (dedicationUserName.length > 15) { 
         dedicationUserName = "User";
       }
     }
@@ -183,7 +163,7 @@ export default function PoemWeaverPage() {
               <CardHeader className="p-4 sm:p-6 border-b border-border/30">
                 <TabsList className="grid w-full grid-cols-2 md:w-auto md:mx-auto">
                     <TabsTrigger value="create" className="text-sm sm:text-base">
-                        <Wand2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />Create Poem
+                        <Wand2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />Write Poem
                     </TabsTrigger>
                     <TabsTrigger value="history" className="text-sm sm:text-base">
                         <History className="mr-2 h-4 w-4 sm:h-5 sm:w-5" />Poem History
@@ -192,19 +172,18 @@ export default function PoemWeaverPage() {
               </CardHeader>
               <CardContent className="p-6 sm:p-8">
                 <TabsContent value="create">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
-                    <div className="space-y-6">
+                  <div className="space-y-6">
                       <h2 className="text-2xl font-headline font-semibold text-foreground">Compose Your Verse</h2>
                       <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                           <FormField
                             control={form.control}
-                            name="theme"
+                            name="title"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-base">Theme</FormLabel>
+                                <FormLabel className="text-base">Title</FormLabel>
                                 <FormControl>
-                                  <Input placeholder="e.g., First Bloom, Gentle Rain, Serene Sunset" {...field} className="text-base py-3 px-4 rounded-md" />
+                                  <Input placeholder="e.g., My Ode to Spring, A Silent Night" {...field} className="text-base py-3 px-4 rounded-md" />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -212,38 +191,27 @@ export default function PoemWeaverPage() {
                           />
                           <FormField
                             control={form.control}
-                            name="style"
+                            name="poem"
                             render={({ field }) => (
                               <FormItem>
-                                <FormLabel className="text-base">Style</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-                                  <FormControl>
-                                    <SelectTrigger className="text-base py-3 px-4 rounded-md">
-                                      <SelectValue placeholder="Select a poem style" />
-                                    </SelectTrigger>
-                                  </FormControl>
-                                  <SelectContent>
-                                    {poemStyles.map((style) => (
-                                      <SelectItem key={style} value={style} className="text-base">
-                                        {style}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
+                                <FormLabel className="text-base">Your Poem</FormLabel>
+                                <FormControl>
+                                  <Textarea placeholder="Write your beautiful poem here..." {...field} className="text-base py-3 px-4 rounded-md min-h-[200px] md:min-h-[250px]" />
+                                </FormControl>
                                 <FormMessage />
                               </FormItem>
                             )}
                           />
                           <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                            <Button type="submit" disabled={isLoadingPoem} className="w-full sm:w-auto text-base px-6 py-3 rounded-md">
-                              {isLoadingPoem ? (
+                            <Button type="submit" disabled={isSavingPoem} className="w-full sm:w-auto text-base px-6 py-3 rounded-md">
+                              {isSavingPoem ? (
                                 <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                               ) : (
-                                <Wand2 className="mr-2 h-5 w-5" />
+                                <Save className="mr-2 h-5 w-5" />
                               )}
-                              Generate Poem
+                              Save Poem
                             </Button>
-                            <Button type="button" variant="secondary" onClick={handleReset} disabled={isLoadingPoem} className="w-full sm:w-auto text-base px-6 py-3 rounded-md">
+                            <Button type="button" variant="secondary" onClick={handleReset} disabled={isSavingPoem} className="w-full sm:w-auto text-base px-6 py-3 rounded-md">
                               <RotateCcw className="mr-2 h-5 w-5" />
                               Reset
                             </Button>
@@ -251,38 +219,6 @@ export default function PoemWeaverPage() {
                         </form>
                       </Form>
                     </div>
-
-                    <Separator orientation="vertical" className="hidden md:block mx-auto h-auto bg-border/70" />
-                    <Separator orientation="horizontal" className="block md:hidden my-6 bg-border/70" />
-
-                    <div className="space-y-4">
-                      <h2 className="text-2xl font-headline font-semibold text-foreground">Your Poetic Creation</h2>
-                      <Card className="min-h-[250px] md:min-h-[300px] flex items-center justify-center p-6 bg-muted/30 rounded-lg border-dashed border-border/50">
-                        {isLoadingPoem ? (
-                          <div className="text-center text-muted-foreground">
-                            <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-2" />
-                            <p>Weaving your masterpiece...</p>
-                          </div>
-                        ) : error ? (
-                          <p className="text-destructive text-center">{error}</p>
-                        ) : generatedPoem ? (
-                          <div
-                            className={cn(
-                              "whitespace-pre-wrap text-foreground text-left w-full transition-opacity duration-1000 ease-in-out",
-                              animatePoem ? "opacity-100" : "opacity-0"
-                            )}
-                          >
-                            {generatedPoem}
-                          </div>
-                        ) : (
-                          <div className="text-center text-muted-foreground">
-                            <BookMarked className="h-12 w-12 text-primary/70 mx-auto mb-3" />
-                             <p>{dedicationUserName}, your beautifully crafted poem will appear here. Let inspiration find you!</p>
-                          </div>
-                        )}
-                      </Card>
-                    </div>
-                  </div>
                 </TabsContent>
                 <TabsContent value="history">
                    <h2 className="text-2xl font-headline font-semibold text-foreground mb-4">Your Saved Poems</h2>

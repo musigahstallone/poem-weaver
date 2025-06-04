@@ -2,20 +2,20 @@
 'use server';
 
 import { db } from '@/lib/firebase';
-import type { GeneratePoemInput, GeneratePoemOutput } from '@/ai/flows/generate-poem';
-import { collection, addDoc, query, where, orderBy, getDocs, serverTimestamp, type Timestamp } from 'firebase/firestore';
+import { collection, addDoc, query, orderBy, getDocs, serverTimestamp, type Timestamp } from 'firebase/firestore';
 
-export interface PoemHistoryItem extends GeneratePoemInput {
+export interface PoemHistoryItem {
   id: string;
-  poem: string;
   userId: string;
+  title: string; 
+  poem: string; 
   createdAt: Timestamp;
 }
 
 export async function savePoemToHistory(
   userId: string,
-  input: GeneratePoemInput,
-  output: GeneratePoemOutput
+  title: string,
+  poemContent: string
 ): Promise<string | null> {
   if (!userId) {
     console.error("User ID is required to save poem to history.");
@@ -24,16 +24,20 @@ export async function savePoemToHistory(
   try {
     const poemData = {
       userId,
-      theme: input.theme,
-      style: input.style,
-      poem: output.poem,
+      title,
+      poem: poemContent,
       createdAt: serverTimestamp(),
     };
+    // Firestore path: users/{userId}/poems/{poemId}
     const docRef = await addDoc(collection(db, 'users', userId, 'poems'), poemData);
     return docRef.id;
   } catch (error) {
     console.error("Error saving poem to history:", error);
-    return null;
+    // Optionally, rethrow or return a more specific error object
+    if (error instanceof Error) {
+        throw new Error(`Failed to save poem: ${error.message}`);
+    }
+    throw new Error("An unknown error occurred while saving the poem.");
   }
 }
 

@@ -20,10 +20,10 @@ export default function PoemDisplayDialog({ poem, isOpen, onClose }: PoemDisplay
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] bg-card/95 backdrop-blur-md border-border/50 shadow-xl rounded-lg">
-        <DialogHeader className="pr-10"> {/* Add padding for close button */}
-          <DialogTitle className="text-2xl font-headline text-primary">{poem.theme}</DialogTitle>
+        <DialogHeader className="pr-10">
+          <DialogTitle className="text-2xl font-headline text-primary">{poem.title}</DialogTitle>
           <DialogDescription className="text-sm text-muted-foreground pt-1">
-            Style: {poem.style} - Crafted {poem.createdAt ? formatDistanceToNow(poem.createdAt.toDate(), { addSuffix: true }) : 'some time ago'}
+            Crafted {poem.createdAt ? formatDistanceToNow(poem.createdAt.toDate(), { addSuffix: true }) : 'some time ago'}
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[50vh] max-h-[400px] my-4 pr-4 rounded-md border border-border/30 bg-muted/20 p-4">

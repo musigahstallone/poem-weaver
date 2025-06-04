@@ -2,7 +2,7 @@
 'use client';
 
 import type { User } from 'firebase/auth';
-import { GoogleAuthProvider, signInWithPopup, signOut as firebaseSignOut, createUserWithEmailAndPassword, signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword } from 'firebase/auth';
+import { signOut as firebaseSignOut, createUserWithEmailAndPassword, signInWithEmailAndPassword as firebaseSignInWithEmailAndPassword, deleteUser as firebaseDeleteUser } from 'firebase/auth';
 import { useRouter, usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
 import React, { createContext, useContext, useEffect, useState } from 'react';
@@ -12,10 +12,10 @@ import { Loader2 } from 'lucide-react';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
   registerWithEmail: (email: string, pass: string) => Promise<User | null | string>;
   signInWithEmail: (email: string, pass: string) => Promise<User | null | string>;
   signOut: () => Promise<void>;
+  deleteUserAccount: () => Promise<boolean | string>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,24 +38,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => unsubscribe();
   }, []);
-
-  const signInWithGoogle = async () => {
-    setLoading(true);
-    const provider = new GoogleAuthProvider();
-    try {
-      const result = await signInWithPopup(auth, provider);
-      if (result.user) {
-        setUser(result.user);
-        router.push('/');
-      }
-    } catch (error) {
-      console.error("Error signing in with Google:", error);
-      setUser(null);
-      router.push('/login?error=signInFailed');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const registerWithEmail = async (email: string, pass: string): Promise<User | null | string> => {
     setLoading(true);
@@ -100,6 +82,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const deleteUserAccount = async (): Promise<boolean | string> => {
+    if (!auth.currentUser) return "User not authenticated.";
+    setLoading(true);
+    try {
+      // TODO: Implement a server action to delete user's poems from Firestore
+      // For now, this only deletes the Firebase Auth record.
+      await firebaseDeleteUser(auth.currentUser);
+      setUser(null);
+      setLoading(false);
+      router.push('/login'); // Redirect after deletion
+      return true;
+    } catch (error: any) {
+      console.error("Error deleting user account:", error);
+      setLoading(false);
+      if (error.code === 'auth/requires-recent-login') {
+        return "This operation is sensitive and requires recent authentication. Please sign out and sign back in, then try again to delete your account.";
+      }
+      return error.message || "deleteAccountFailed";
+    }
+  };
+
+
   if (loading && pathname !== '/login') {
      return (
       <div className="flex min-h-svh items-center justify-center bg-background">
@@ -109,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signInWithGoogle, registerWithEmail, signInWithEmail, signOut }}>
+    <AuthContext.Provider value={{ user, loading, registerWithEmail, signInWithEmail, signOut, deleteUserAccount }}>
       {children}
     </AuthContext.Provider>
   );

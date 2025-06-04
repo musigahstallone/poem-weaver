@@ -16,17 +16,20 @@ function PoemHistoryCard({ item, onClick }: { item: PoemHistoryItem; onClick: (i
     <Card 
       className="mb-4 bg-card/70 backdrop-blur-sm border-border/30 shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
       onClick={() => onClick(item)}
-      aria-label={`View poem: ${item.theme}`}
+      aria-label={`View poem: ${item.title}`}
     >
       <CardHeader className="pb-3">
-        <CardTitle className="text-xl font-headline text-primary">{item.theme}</CardTitle>
+        <CardTitle className="text-xl font-headline text-primary">{item.title}</CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
-          Style: {item.style} - Crafted {item.createdAt ? formatDistanceToNow(item.createdAt.toDate(), { addSuffix: true }) : 'some time ago'}
+          Crafted {item.createdAt ? formatDistanceToNow(item.createdAt.toDate(), { addSuffix: true }) : 'some time ago'}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-24">
-          <p className="whitespace-pre-wrap text-sm text-foreground">{item.poem}</p>
+          {/* Display a snippet or the beginning of the poem */}
+          <p className="whitespace-pre-wrap text-sm text-foreground truncate">
+            {item.poem.length > 150 ? item.poem.substring(0, 150) + "..." : item.poem}
+          </p>
         </ScrollArea>
       </CardContent>
     </Card>
@@ -54,7 +57,6 @@ export default function PoemHistoryTab() {
 
   const handleClosePoemDialog = () => {
     setIsPoemDialogVisible(false);
-    // setSelectedPoem(null); // Optional: clear selected poem immediately
   };
 
   if (isLoading) {
@@ -75,7 +77,7 @@ export default function PoemHistoryTab() {
       <div className="flex flex-col items-center justify-center min-h-[300px] text-muted-foreground p-6 text-center">
         <BookHeart className="h-16 w-16 text-primary/70 mb-4" />
         <h3 className="text-xl font-semibold mb-2 text-foreground">No Poems Yet</h3>
-        <p>Start creating beautiful poems, and they will appear here!</p>
+        <p>Start writing beautiful poems, and they will appear here!</p>
       </div>
     );
   }

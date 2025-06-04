@@ -1,13 +1,12 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-  font-family: var(--font-body), sans-serif; /* Ensure fallback is generic */
-}
-
 @layer base {
   :root {
+    --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif; /* Define Geist font variable */
+
     --background: 30 100% 98%; /* Very Light Peach/Pink */
     --foreground: 340 40% 25%; /* Dark Plum/Mauve for text */
 
@@ -105,9 +104,9 @@ body {
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Literata', serif; /* Apply Literata globally */
+    font-family: var(--font-sans), sans-serif; /* Apply Geist globally */
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline; /* Apply Literata to headlines */
+    @apply font-headline; /* Apply Geist to headlines, configured in tailwind.config.ts */
   }
 }

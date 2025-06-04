@@ -28,13 +28,13 @@ const registerSchema = z.object({
   confirmPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match.",
-  path: ["confirmPassword"], // path to show error under
+  path: ["confirmPassword"], 
 });
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 
 export default function LoginPage() {
-  const { user, signInWithGoogle, registerWithEmail, signInWithEmail, loading } = useAuth();
+  const { user, registerWithEmail, signInWithEmail, loading } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [authError, setAuthError] = useState<string | null>(null);
@@ -103,9 +103,9 @@ export default function LoginPage() {
   const onSignInSubmit = async (data: SignInFormValues) => {
     setAuthError(null);
     const result = await signInWithEmail(data.email, data.password);
-    if (typeof result === 'string') { // Error code returned
+    if (typeof result === 'string') { 
       handleAuthError(result);
-    } else if (result) { // User object returned
+    } else if (result) { 
       router.push('/');
     }
   };
@@ -113,9 +113,9 @@ export default function LoginPage() {
   const onRegisterSubmit = async (data: RegisterFormValues) => {
     setAuthError(null);
     const result = await registerWithEmail(data.email, data.password);
-     if (typeof result === 'string') { // Error code returned
+     if (typeof result === 'string') { 
       handleAuthError(result);
-    } else if (result) { // User object returned
+    } else if (result) { 
       router.push('/');
     }
   };
@@ -190,7 +190,7 @@ export default function LoginPage() {
                   />
                   <Button type="submit" disabled={loading} className="w-full text-base py-3 rounded-md">
                     {loading && signInForm.formState.isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <LogIn className="mr-2 h-5 w-5" />}
-                    Sign In with Email
+                    Sign In
                   </Button>
                 </form>
               </Form>
@@ -249,37 +249,12 @@ export default function LoginPage() {
                   />
                   <Button type="submit" disabled={loading} className="w-full text-base py-3 rounded-md">
                     {loading && registerForm.formState.isSubmitting ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <UserPlus className="mr-2 h-5 w-5" />}
-                    Register with Email
+                    Register
                   </Button>
                 </form>
               </Form>
             </TabsContent>
           </Tabs>
-          
-          <div className="relative my-4">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border/70" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-            </div>
-          </div>
-
-          <Button
-            onClick={signInWithGoogle}
-            disabled={loading}
-            variant="outline"
-            className="w-full text-base py-3 rounded-md"
-            size="lg"
-          >
-            {loading && !signInForm.formState.isSubmitting && !registerForm.formState.isSubmitting ? (
-              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-            ) : (
-              // Basic Google Icon SVG - consider using a library or better SVG if available
-              <svg className="mr-2 h-5 w-5" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Google</title><path d="M12.48 10.92v3.28h7.84c-.24 1.84-.85 3.18-1.73 4.1-1.05 1.05-2.36 1.84-4.1 1.84-4.76 0-8.64-3.88-8.64-8.64s3.88-8.64 8.64-8.64c2.36 0 3.92.76 4.95 1.84l2.56-2.47C19.92.54 17.1.001 12.48 0C5.86.001.32 5.39.32 12.32s5.54 12.32 12.16 12.32c3.36 0 5.92-1.16 7.84-3.08 2.08-2.08 2.84-5.08 2.84-7.52-.08-.65-.16-1.25-.24-1.84h-7.84z" fill="#4285F4"/></svg>
-            )}
-            Sign In with Google
-          </Button>
         </CardContent>
       </Card>
       <footer className="mt-12 text-center text-muted-foreground text-sm">

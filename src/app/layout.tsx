@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import Image from 'next/image';
-import { AuthProvider } from '@/contexts/AuthContext'; // Import AuthProvider
+import { AuthProvider } from '@/contexts/AuthContext'; 
 
 export const metadata: Metadata = {
   title: 'Poem Weaver for Winsy',
@@ -18,12 +18,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,200..900;1,7..72,200..900&display=swap" rel="stylesheet" />
+        {/* Removed Google Font link for Literata. 
+            If Geist requires a CDN link, it would be added here.
+            Example for Geist from CDN (if you choose to use one):
+            <link href="https://fonts.cdnfonts.com/css/geist" rel="stylesheet" /> 
+            For now, assuming Geist is available or self-hosted.
+        */}
       </head>
-      <body className="font-body antialiased">
-        <AuthProvider> {/* Wrap with AuthProvider */}
+      <body className="font-sans antialiased"> {/* Changed from font-body to font-sans */}
+        <AuthProvider> 
           <div className="fixed inset-0 -z-10">
             <Image
               src="https://placehold.co/1920x1080.png?text=+" 
@@ -33,7 +36,7 @@ export default function RootLayout({
               quality={80}
               data-ai-hint="elegant floral"
             />
-            <div className="absolute inset-0 bg-background/60 backdrop-blur-sm"></div> {/* Soft overlay for better text readability */}
+            <div className="absolute inset-0 bg-background/60 backdrop-blur-sm"></div> 
           </div>
           <div className="relative z-0">
             {children}

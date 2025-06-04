@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -10,8 +11,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Literata', 'serif'],
-        headline: ['Literata', 'serif'],
+        sans: ['var(--font-sans)', 'sans-serif'], // Use the CSS variable for sans
+        headline: ['var(--font-sans)', 'sans-serif'], // Also use Geist for headlines
+        body: ['var(--font-sans)', 'sans-serif'], // Also use Geist for body
         code: ['monospace'],
       },
       colors: {
