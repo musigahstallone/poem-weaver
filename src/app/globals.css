@@ -5,96 +5,98 @@
 
 @layer base {
   :root {
-    --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif; /* Define Geist font variable */
+    --font-sans: "Geist", "Geist Fallback", system-ui, sans-serif;
 
-    --background: 30 100% 98%; /* Very Light Peach/Pink */
-    --foreground: 340 40% 25%; /* Dark Plum/Mauve for text */
+    /* Enhanced Girlish & Beautiful Theme */
+    --background: 30 100% 99%; /* Very Light Creamy Peach */
+    --foreground: 335 35% 30%; /* Soft Dark Plum for text */
 
     --card: 0 0% 100%; /* White for card background */
-    --card-foreground: 340 40% 25%; /* Dark Plum/Mauve for card text */
+    --card-foreground: 335 35% 30%; /* Soft Dark Plum for card text */
 
     --popover: 0 0% 100%;
-    --popover-foreground: 340 40% 25%;
+    --popover-foreground: 335 35% 30%;
 
-    --primary: 330 80% 70%; /* Soft Pink */
-    --primary-foreground: 0 0% 100%; /* White for text on primary */
+    --primary: 340 90% 75%; /* Brighter, Clear Pink */
+    --primary-foreground: 335 40% 15%; /* Darker contrast for text on primary */
 
-    --secondary: 300 70% 94%; /* Pale Lavender */
-    --secondary-foreground: 340 40% 25%; /* Dark Plum/Mauve for text on secondary */
+    --secondary: 300 80% 96%; /* Very Pale Lavender */
+    --secondary-foreground: 335 35% 30%; /* Soft Dark Plum for text on secondary */
 
-    --muted: 30 60% 96%; /* Very light peachy pink */
-    --muted-foreground: 340 20% 50%; /* Muted plum/gray text */
+    --muted: 30 100% 97%; /* Lighter, softer peach */
+    --muted-foreground: 335 25% 55%; /* Muted plum/gray text */
 
-    --accent: 30 70% 80%; /* Soft Apricot/Gold */
-    --accent-foreground: 340 40% 20%; /* Dark text for accent */
+    --accent: 320 90% 80%; /* Soft Magenta/Orchid */
+    --accent-foreground: 0 0% 100%; /* White text for accent */
     
-    --destructive: 0 70% 60%;
+    --destructive: 0 75% 65%; /* Softer Red */
     --destructive-foreground: 0 0% 100%;
 
-    --border: 30 50% 90%; /* Light Pinkish Border */
-    --input: 30 100% 99%; /* Very Light Pinkish Input BG */
-    --ring: 330 70% 60%; /* Darker Pink for focus rings */
+    --border: 340 60% 92%; /* Light Pinkish Border, softer */
+    --input: 30 100% 98%; /* Very Light Creamy Peach for Input BG */
+    --ring: 340 80% 70%; /* Pink for focus rings */
     
-    --chart-1: 330 76% 61%;
-    --chart-2: 300 58% 59%;
-    --chart-3: 270 37% 44%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
-    --radius: 0.5rem;
+    --chart-1: 340 80% 70%;
+    --chart-2: 300 70% 75%;
+    --chart-3: 270 50% 60%;
+    --chart-4: 40 85% 75%; /* Soft Gold */
+    --chart-5: 25 90% 78%; /* Soft Coral */
+    --radius: 0.75rem; /* Slightly more rounded */
 
-    --sidebar-background: 30 80% 98%;
-    --sidebar-foreground: 340 40% 25%;
-    --sidebar-primary: 330 70% 65%;
+    /* Sidebar colors (though sidebar component might not be used now) */
+    --sidebar-background: 30 90% 98%;
+    --sidebar-foreground: 335 35% 30%;
+    --sidebar-primary: 340 80% 70%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 300 60% 92%;
-    --sidebar-accent-foreground: 340 40% 20%;
-    --sidebar-border: 30 50% 90%;
-    --sidebar-ring: 330 70% 55%;
+    --sidebar-accent: 300 70% 94%;
+    --sidebar-accent-foreground: 335 35% 30%;
+    --sidebar-border: 340 60% 90%;
+    --sidebar-ring: 340 80% 65%;
   }
 
   .dark {
-    --background: 340 10% 15%; /* Dark Plum */
-    --foreground: 30 30% 95%; /* Light Peach/Pink text */
+    --background: 335 15% 18%; /* Dark Plum */
+    --foreground: 30 60% 96%; /* Light Peach/Pink text */
 
-    --card: 340 10% 20%;
-    --card-foreground: 30 30% 95%;
+    --card: 335 15% 22%;
+    --card-foreground: 30 60% 96%;
 
-    --popover: 340 10% 20%;
-    --popover-foreground: 30 30% 95%;
+    --popover: 335 15% 22%;
+    --popover-foreground: 30 60% 96%;
 
-    --primary: 330 70% 60%; 
-    --primary-foreground: 0 0% 10%;
+    --primary: 340 80% 65%; 
+    --primary-foreground: 335 40% 10%;
 
-    --secondary: 300 50% 80%; 
-    --secondary-foreground: 340 10% 15%;
+    --secondary: 300 60% 30%; 
+    --secondary-foreground: 30 50% 90%;
 
-    --muted: 340 10% 25%;
-    --muted-foreground: 30 20% 65%;
+    --muted: 335 15% 28%;
+    --muted-foreground: 30 40% 70%;
 
-    --accent: 30 60% 70%; 
-    --accent-foreground: 340 10% 10%;
+    --accent: 320 80% 70%; 
+    --accent-foreground: 0 0% 10%;
 
-    --destructive: 0 60% 50%;
-    --destructive-foreground: 30 30% 95%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 30 60% 96%;
 
-    --border: 340 10% 30%;
-    --input: 340 10% 28%;
-    --ring: 330 70% 50%;
+    --border: 335 15% 30%;
+    --input: 335 15% 26%;
+    --ring: 340 80% 60%;
     
-    --chart-1: 330 70% 50%;
-    --chart-2: 300 60% 45%;
-    --chart-3: 40 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --chart-1: 340 70% 60%;
+    --chart-2: 300 60% 55%;
+    --chart-3: 40 80% 65%;
+    --chart-4: 280 65% 70%;
+    --chart-5: 320 75% 65%;
 
-    --sidebar-background: 340 10% 18%;
-    --sidebar-foreground: 30 30% 95%;
-    --sidebar-primary: 330 70% 55%;
-    --sidebar-primary-foreground: 0 0% 10%;
-    --sidebar-accent: 300 50% 75%;
-    --sidebar-accent-foreground: 340 10% 15%;
-    --sidebar-border: 340 10% 25%;
-    --sidebar-ring: 330 70% 45%;
+    --sidebar-background: 335 15% 20%;
+    --sidebar-foreground: 30 60% 96%;
+    --sidebar-primary: 340 80% 60%;
+    --sidebar-primary-foreground: 335 40% 10%;
+    --sidebar-accent: 300 60% 35%;
+    --sidebar-accent-foreground: 30 50% 90%;
+    --sidebar-border: 335 15% 25%;
+    --sidebar-ring: 340 80% 55%;
   }
 }
 
@@ -104,9 +106,25 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-sans), sans-serif; /* Apply Geist globally */
+    font-family: var(--font-sans), sans-serif;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline; /* Apply Geist to headlines, configured in tailwind.config.ts */
+    @apply font-headline;
   }
 }
+
+/* Additional subtle global styles for a softer feel */
+@layer components {
+  .btn {
+    @apply shadow-md hover:shadow-lg transition-shadow duration-300;
+  }
+  .card {
+    @apply rounded-xl shadow-xl; /* More pronounced rounding and shadow for cards */
+  }
+  input[type="text"],
+  textarea,
+  .select-trigger { /* Targeting SelectTrigger via a conventional class if needed, or its direct class */
+    @apply bg-background/70 border-border/70 focus:border-primary focus:ring-primary/50;
+  }
+}
+
