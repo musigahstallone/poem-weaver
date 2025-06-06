@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -26,10 +27,10 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
-import { savePoemToHistory } from '@/services/poemHistoryService';
+import { savePoemToHistory, type PoemHistoryItem } from '@/services/poemHistoryService';
 import PoemHistoryTab from '@/components/PoemHistoryTab';
 import { useQueryClient } from '@tanstack/react-query';
-import { generatePoem } from '@/ai/flows/generate-poem';
+import { generatePoem, type PoemGenerationInput, type PoemGenerationOutput } from '@/ai/flows/generate-poem';
 
 const formSchema = z.object({
   theme: z.string().min(2, { message: "Theme must be at least 2 characters." }).max(100, { message: "Theme must be at most 100 characters." }),
@@ -75,19 +76,16 @@ export default function PoemWeaverPage() {
   }, [user, authLoading, router]);
 
   useEffect(() => {
-    if (user) { 
-      const hasSeenDedication = localStorage.getItem(`seenDedicationStalloneToUser_${user.uid}`);
-      if (!hasSeenDedication) {
-        setShowDedicationModal(true);
-      }
+    // Show dedication modal once per session or based on a more persistent flag if needed
+    const hasSeenDedication = sessionStorage.getItem('seenDedicationWinsy');
+    if (!hasSeenDedication) {
+      setShowDedicationModal(true);
     }
-  }, [user]);
+  }, []);
 
   const handleCloseDedicationModal = () => {
     setShowDedicationModal(false);
-    if (user) {
-      localStorage.setItem(`seenDedicationStalloneToUser_${user.uid}`, 'true');
-    }
+    sessionStorage.setItem('seenDedicationWinsy', 'true');
   };
 
   async function onGenerateSubmit(data: PoemFormValues) {
@@ -131,9 +129,6 @@ export default function PoemWeaverPage() {
         description: "Your masterpiece is saved to your history.",
       });
       queryClient.invalidateQueries({ queryKey: ['poemHistory', user.uid] });
-      // Optionally reset parts of the form or generated content here
-      // setGeneratedPoem(null); 
-      // form.reset(); // or just reset generated poem related state
     } catch (err) {
       console.error("Error saving poem:", err);
       const errorMessage = err instanceof Error ? err.message : "Failed to save poem. Please try again.";
@@ -156,22 +151,9 @@ export default function PoemWeaverPage() {
     setIsLoadingPoem(false);
     setIsSavingPoem(false);
   }
-
-  let dedicationUserName = "Friend"; 
-  if (user) {
-    if (user.displayName) {
-      const nameParts = user.displayName.split(' ');
-      dedicationUserName = nameParts[0].charAt(0).toUpperCase() + nameParts[0].slice(1);
-    } else if (user.email) {
-      const emailPrefix = user.email.split('@')[0];
-      dedicationUserName = emailPrefix.charAt(0).toUpperCase() + emailPrefix.slice(1);
-      if (dedicationUserName.length > 15) { 
-        dedicationUserName = "User";
-      }
-    }
-  }
   
-  const initialDedicationMessage = `This app is lovingly dedicated to ${dedicationUserName} from your friend, Stallone. May your days be filled with beautiful verses and endless inspiration!`;
+  const dedicationUserName = "Winsy"; 
+  const initialDedicationMessage = `This app is lovingly dedicated to ${dedicationUserName} from her friend, Stallone. May your days be filled with beautiful verses and endless inspiration!`;
 
   if (authLoading || !user) {
     return (

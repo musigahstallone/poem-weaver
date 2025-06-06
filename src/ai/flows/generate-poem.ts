@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview AI flow for generating poems.
@@ -37,10 +38,11 @@ Theme: {{{theme}}}
 Style: {{{style}}}
 
 Weave your words with elegance and emotion. The poem should be uplifting, inspiring, or deeply touching, suitable for Winsy.
+Aim for a poem of considerable length, exploring the theme and style in depth. A longer, more developed piece is preferred.
 Ensure the poem is well-structured according to the specified style if it's a formal one (like sonnet or haiku). For free verse, let creativity flow.
 `,
   config: {
-    model: 'gemini-1.5-flash-latest', 
+    model: 'gemini-1.5-flash-latest',
     temperature: 0.7,
     maxOutputTokens: 512,
     // safetySettings: [ 
