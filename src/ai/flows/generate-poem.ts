@@ -28,6 +28,7 @@ export async function generatePoem(input: PoemGenerationInput): Promise<PoemGene
 
 const poemPrompt = ai.definePrompt({
   name: 'poemPrompt',
+  model: 'gemini-1.5-flash-latest', // Moved model here
   input: { schema: PoemGenerationInputSchema },
   output: { schema: PoemGenerationOutputSchema },
   prompt: `You are an exceptionally gifted poet, known for your ability to craft verses that resonate deeply.
@@ -42,7 +43,7 @@ Aim for a poem of considerable length, exploring the theme and style in depth. A
 Ensure the poem is well-structured according to the specified style if it's a formal one (like sonnet or haiku). For free verse, let creativity flow.
 `,
   config: {
-    model: 'gemini-1.5-flash-latest',
+    // model: 'gemini-1.5-flash-latest', // Removed from here
     temperature: 0.7,
     maxOutputTokens: 512,
     // safetySettings: [ 
@@ -68,3 +69,4 @@ const generatePoemFlow = ai.defineFlow(
     return output;
   }
 );
+

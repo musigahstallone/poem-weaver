@@ -17,7 +17,5 @@ export const ai = genkit({
     googleAI(),
     // nextPlugin() has been removed as it's causing an import error
   ],
-  // Set to true to disable Genkit telemetry.
-  // Demos and samples should have this set to true.
-  enableOpenTelemetry: false, 
+  model: 'googleai/gemini-2.0-flash'
 });
