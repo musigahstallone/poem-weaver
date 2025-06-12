@@ -13,9 +13,6 @@ import {googleAI} from '@genkit-ai/googleai';
 // Initialize Genkit with the GoogleAI plugin.
 // Ensure GOOGLE_API_KEY environment variable is set.
 export const ai = genkit({
-  plugins: [
-    googleAI(),
-    // nextPlugin() has been removed as it's causing an import error
-  ],
+  plugins: [googleAI()],
   model: 'googleai/gemini-2.0-flash'
 });

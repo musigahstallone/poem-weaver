@@ -28,22 +28,20 @@ export async function generatePoem(input: PoemGenerationInput): Promise<PoemGene
 
 const poemPrompt = ai.definePrompt({
   name: 'poemPrompt',
-  model: 'gemini-2.0-flash', // Moved model here
+  model: 'gemini-1.5-flash-latest',
   input: { schema: PoemGenerationInputSchema },
   output: { schema: PoemGenerationOutputSchema },
   prompt: `You are an exceptionally gifted poet, known for your ability to craft verses that resonate deeply.
-A user named Winsy will be reading these poems, so make them especially beautiful, thoughtful, and fitting for her.
 Please compose a poem based on the following details:
 
 Theme: {{{theme}}}
 Style: {{{style}}}
 
-Weave your words with elegance and emotion. The poem should be uplifting, inspiring, or deeply touching, suitable for Winsy.
+Weave your words with elegance and emotion. The poem should be uplifting, inspiring, or deeply touching.
 Aim for a poem of considerable length, exploring the theme and style in depth. A longer, more developed piece is preferred.
 Ensure the poem is well-structured according to the specified style if it's a formal one (like sonnet or haiku). For free verse, let creativity flow.
 `,
   config: {
-    // model: 'gemini-1.5-flash-latest', // Removed from here
     temperature: 0.7,
     maxOutputTokens: 512,
     // safetySettings: [ 
@@ -69,4 +67,3 @@ const generatePoemFlow = ai.defineFlow(
     return output;
   }
 );
-

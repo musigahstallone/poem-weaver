@@ -5,8 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import Image from 'next/image';
 
 export const metadata: Metadata = {
-  title: 'Poem Weaver for Winsy',
-  description: 'Craft beautiful poems, dedicated to Winsy.',
+  title: 'Poem Weaver',
+  description: 'Craft beautiful poems with AI.',
 };
 
 export default function RootLayout({
@@ -23,7 +23,7 @@ export default function RootLayout({
         <div className="fixed inset-0 -z-10">
           <Image
             src="https://placehold.co/1920x1080.png?text=+"
-            alt="Elegant floral background for Winsy's Poem Weaver"
+            alt="Elegant floral background for Poem Weaver"
             layout="fill"
             objectFit="cover"
             quality={80}

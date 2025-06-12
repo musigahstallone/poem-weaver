@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,16 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Wand2, RotateCcw, Loader2, Heart, AlertTriangleIcon } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Wand2, RotateCcw, Loader2, AlertTriangleIcon, Save } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import { generatePoem, type PoemGenerationInput } from '@/ai/flows/generate-poem';
 
@@ -46,7 +37,6 @@ export default function PoemWeaverPage() {
   const [currentStyle, setCurrentStyle] = useState<string | null>(null);
   const [aiError, setAiError] = useState<string | null>(null);
   
-  const [showDedicationModal, setShowDedicationModal] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<PoemFormValues>({
@@ -56,18 +46,6 @@ export default function PoemWeaverPage() {
       style: '',
     },
   });
-
-  useEffect(() => {
-    const hasSeenDedication = sessionStorage.getItem('seenDedicationWinsyApp');
-    if (!hasSeenDedication) {
-      setShowDedicationModal(true);
-    }
-  }, []);
-
-  const handleCloseDedicationModal = () => {
-    setShowDedicationModal(false);
-    sessionStorage.setItem('seenDedicationWinsyApp', 'true');
-  };
 
   async function onGenerateSubmit(data: PoemFormValues) {
     setIsLoadingPoem(true);
@@ -101,33 +79,24 @@ export default function PoemWeaverPage() {
     setAiError(null);
     setIsLoadingPoem(false);
   }
-  
-  const dedicationUserName = "Winsy"; 
-  const initialDedicationMessage = `This app is lovingly dedicated to ${dedicationUserName} from her friend, Stallone. May your days be filled with beautiful verses and endless inspiration!`;
 
+  function handleSavePoem() {
+    if (!generatedPoem || !currentTheme || !currentStyle) return;
+    // In a full app with user accounts, this would save to user-specific history.
+    // For now, it just toasts a success message.
+    toast({
+      title: "Poem Saved (Simulated)",
+      description: "Your poem has been notionally saved! In a full app, this would go to your history.",
+    });
+  }
+  
   return (
     <>
-      <AlertDialog open={showDedicationModal} onOpenChange={setShowDedicationModal}>
-        <AlertDialogContent className="bg-card/95 backdrop-blur-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-2xl font-headline">
-              <Heart className="h-7 w-7 text-primary" /> A Special Dedication
-            </AlertDialogTitle>
-            <AlertDialogDescription className="pt-3 text-base text-foreground/80 text-left">
-              {initialDedicationMessage}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={handleCloseDedicationModal} className="text-base px-5 py-2.5">Continue to App</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-      
       <div className="flex flex-col min-h-svh items-center bg-transparent">
         <Navbar />
         <main className="flex-grow flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 w-full">
           <header className="mb-8 text-center">
-            <p className="text-muted-foreground mt-2 text-lg">Discover the magic of words, {dedicationUserName}!</p>
+            <p className="text-muted-foreground mt-2 text-lg">Discover the magic of words!</p>
           </header>
 
           <Card className="w-full max-w-2xl shadow-2xl rounded-xl bg-card/90 backdrop-blur-md border-border/50">
@@ -135,7 +104,7 @@ export default function PoemWeaverPage() {
                 <CardTitle className="text-3xl font-headline text-primary flex items-center justify-center gap-2">
                     <Wand2 className="h-8 w-8" />Craft Your Verse
                 </CardTitle>
-                <CardDescription className="pt-2 text-muted-foreground">Let the AI weave a poem just for Winsy.</CardDescription>
+                <CardDescription className="pt-2 text-muted-foreground">Let the AI weave a poem for you.</CardDescription>
             </CardHeader>
             <CardContent className="p-6 sm:p-8">
                 <div className="space-y-6">
@@ -206,7 +175,7 @@ export default function PoemWeaverPage() {
                     {generatedPoem && (
                     <Card className="mt-6 bg-muted/30 border-primary/30 shadow-inner rounded-lg">
                         <CardHeader>
-                        <CardTitle className="text-xl font-headline text-primary">Winsy's Generated Poem</CardTitle>
+                        <CardTitle className="text-xl font-headline text-primary">Your Generated Poem</CardTitle>
                         <CardDescription>Theme: {currentTheme} | Style: {currentStyle}</CardDescription>
                         </CardHeader>
                         <CardContent>
@@ -214,9 +183,12 @@ export default function PoemWeaverPage() {
                             value={generatedPoem}
                             readOnly
                             className="text-base py-3 px-4 rounded-md min-h-[200px] md:min-h-[250px] bg-background/50 border-border/50 focus-visible:ring-primary/50"
-                            aria-label="Generated poem for Winsy"
+                            aria-label="Generated poem"
                         />
-                        {/* Save button removed as history is removed */}
+                        <Button onClick={handleSavePoem} className="mt-4 text-base px-5 py-2.5" variant="outline">
+                            <Save className="mr-2 h-5 w-5" />
+                            Save Poem (Simulated)
+                        </Button>
                         </CardContent>
                     </Card>
                     )}
@@ -224,7 +196,7 @@ export default function PoemWeaverPage() {
             </CardContent>
           </Card>
           <footer className="mt-12 text-center text-muted-foreground text-sm space-y-2">
-            <p>&copy; {new Date().getFullYear()} Poem Weaver. Specially for {dedicationUserName}, from Stallone.</p>
+            <p>&copy; {new Date().getFullYear()} Poem Weaver.</p>
             <p className="text-xs">
               Developed by Stallone Musigah
               <br />
