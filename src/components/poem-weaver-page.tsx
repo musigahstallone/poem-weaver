@@ -203,7 +203,7 @@ export default function PoemWeaverPage() {
               <a href="https://musigahstallone.tech" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary transition-colors">
                 musigahstallone.tech
               </a>
-              {' | '}0797204141
+              {' | '} +254797204141
             </p>
           </footer>
         </main>
