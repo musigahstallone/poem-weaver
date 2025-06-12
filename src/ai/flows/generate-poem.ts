@@ -28,7 +28,7 @@ export async function generatePoem(input: PoemGenerationInput): Promise<PoemGene
 
 const poemPrompt = ai.definePrompt({
   name: 'poemPrompt',
-  model: 'gemini-1.5-flash-latest', // Moved model here
+  model: 'gemini-2.0-flash', // Moved model here
   input: { schema: PoemGenerationInputSchema },
   output: { schema: PoemGenerationOutputSchema },
   prompt: `You are an exceptionally gifted poet, known for your ability to craft verses that resonate deeply.
